@@ -15,7 +15,6 @@ static CompletionHandler storedCompletionHandler;
 
 @implementation RNBackgroundDownloader {
     NSURLSession *urlSession;
-    NSURLSessionConfiguration *sessionConfig;
     NSMutableDictionary<NSNumber *, RNBGDTaskConfig *> *taskToConfigMap;
     NSMutableDictionary<NSString *, NSURLSessionDownloadTask *> *idToTaskMap;
     NSMutableDictionary<NSString *, NSData *> *idToResumeDataMap;
@@ -42,7 +41,7 @@ RCT_EXPORT_MODULE();
 
 - (NSDictionary *)constantsToExport {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    
+
     return @{
              @"documents": [paths firstObject],
              @"TaskRunning": @(NSURLSessionTaskStateRunning),
@@ -64,7 +63,6 @@ RCT_EXPORT_MODULE();
         idToPercentMap = [[NSMutableDictionary alloc] init];
         NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
         NSString *sessonIdentifier = [bundleIdentifier stringByAppendingString:@".backgrounddownloadtask"];
-        sessionConfig = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:sessonIdentifier];
         progressReports = [[NSMutableDictionary alloc] init];
         lastProgressReport = [[NSDate alloc] init];
         sharedLock = [NSNumber numberWithInt:1];
@@ -74,6 +72,10 @@ RCT_EXPORT_MODULE();
 
 - (void)lazyInitSession {
     if (urlSession == nil) {
+    NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+        NSString *stringToAppend = [@".backgrounddownloadtask_" stringByAppendingString:[timestamp stringValue]];
+        NSString *sessonIdentifier = [bundleIdentifier stringByAppendingString:stringToAppend];
+        sessionConfig = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:sessonIdentifier];
         urlSession = [NSURLSession sessionWithConfiguration:sessionConfig delegate:self delegateQueue:nil];
     }
 }
@@ -117,14 +119,14 @@ RCT_EXPORT_METHOD(download: (NSDictionary *) options) {
         return;
     }
     [self lazyInitSession];
-    
+
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
     if (headers != nil) {
         for (NSString *headerKey in headers) {
             [request setValue:[headers valueForKey:headerKey] forHTTPHeaderField:headerKey];
         }
     }
-    
+
     @synchronized (sharedLock) {
         NSURLSessionDownloadTask __strong *task = [urlSession downloadTaskWithRequest:request];
         RNBGDTaskConfig *taskConfig = [[RNBGDTaskConfig alloc] initWithDictionary: @{@"id": identifier, @"destination": destination}];
@@ -134,7 +136,7 @@ RCT_EXPORT_METHOD(download: (NSDictionary *) options) {
 
         idToTaskMap[identifier] = task;
         idToPercentMap[identifier] = @0.0;
-        
+
         [task resume];
     }
 }
@@ -239,14 +241,14 @@ RCT_EXPORT_METHOD(checkForExistingDownloads: (RCTPromiseResolveBlock)resolve rej
                 [self sendEventWithName:@"downloadBegin" body:@{@"id": taskCofig.id, @"expectedBytes": [NSNumber numberWithLongLong: totalBytesExpectedToWrite]}];
                 taskCofig.reportedBegin = YES;
             }
-            
+
             NSNumber *prevPercent = idToPercentMap[taskCofig.id];
             NSNumber *percent = [NSNumber numberWithFloat:(float)totalBytesWritten/(float)totalBytesExpectedToWrite];
             if ([percent floatValue] - [prevPercent floatValue] > 0.01f) {
                 progressReports[taskCofig.id] = @{@"id": taskCofig.id, @"written": [NSNumber numberWithLongLong: totalBytesWritten], @"total": [NSNumber numberWithLongLong: totalBytesExpectedToWrite], @"percent": percent};
                 idToPercentMap[taskCofig.id] = percent;
             }
-            
+
             NSDate *now = [[NSDate alloc] init];
             if ([now timeIntervalSinceDate:lastProgressReport] > 1.5 && progressReports.count > 0) {
                 if (self.bridge) {
@@ -289,7 +291,7 @@ RCT_EXPORT_METHOD(checkForExistingDownloads: (RCTPromiseResolveBlock)resolve rej
     if (data == nil) {
         return nil;
     }
-    
+
     return [NSKeyedUnarchiver unarchiveObjectWithData:data];
 }
 
