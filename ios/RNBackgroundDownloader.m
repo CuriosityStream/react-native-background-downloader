@@ -73,6 +73,7 @@ RCT_EXPORT_MODULE();
 
 - (void)lazyInitSession {
     if (urlSession == nil) {
+        NSNumber *timestamp = [NSNumber numberWithDouble:[[NSDate date] timeIntervalSince1970]];
         NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
         NSString *stringToAppend = [@".backgrounddownloadtask_" stringByAppendingString:[timestamp stringValue]];
         NSString *sessonIdentifier = [bundleIdentifier stringByAppendingString:stringToAppend];
