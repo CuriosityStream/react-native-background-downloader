@@ -94,10 +94,6 @@ RCT_EXPORT_MODULE();
             [idToTaskMap removeObjectForKey:taskConfig.id];
             [idToPercentMap removeObjectForKey:taskConfig.id];
         }
-        if (taskToConfigMap.count == 0) {
-            [urlSession invalidateAndCancel];
-            urlSession = nil;
-        }
     }
 }
 
