@@ -65,6 +65,7 @@ RCT_EXPORT_MODULE();
         idToTaskMap = [[NSMutableDictionary alloc] init];
         idToResumeDataMap= [[NSMutableDictionary alloc] init];
         idToPercentMap = [[NSMutableDictionary alloc] init];
+        willDownloadToUrlMap = [[NSMutableDictionary alloc] init];
         NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
         NSString *sessonIdentifier = [bundleIdentifier stringByAppendingString:@".backgrounddownloadtask"];
         progressReports = [[NSMutableDictionary alloc] init];
