@@ -7,6 +7,7 @@
 //
 //
 #import <Foundation/Foundation.h>
+#import <AVKit/AVKit.h>
 #if __has_include(<React/RCTBridgeModule.h>)
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
@@ -17,7 +18,7 @@
 
 typedef void (^CompletionHandler)();
 
-@interface RNBackgroundDownloader : RCTEventEmitter <RCTBridgeModule, NSURLSessionDelegate, NSURLSessionDownloadDelegate>
+@interface RNBackgroundDownloader : RCTEventEmitter <RCTBridgeModule, NSURLSessionDelegate, NSURLSessionDownloadDelegate, AVAssetDownloadDelegate>
 
 + (void)setCompletionHandlerWithIdentifier: (NSString *)identifier completionHandler: (CompletionHandler)completionHandler;
 

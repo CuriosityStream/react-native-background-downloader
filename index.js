@@ -89,6 +89,24 @@ export function download(options) {
     return task;
 }
 
+export function downloadStream(options) {
+    if (!options.id || !options.url || !options.destination) {
+        throw new Error('[RNBackgroundDownloader] id, url and destination are required');
+    }
+    if (options.headers && typeof options.headers === 'object') {
+        options.headers = {
+            ...headers,
+            ...options.headers
+        };
+    } else {
+        options.headers = headers;
+    }
+    RNBackgroundDownloader.downloadStream(options);
+    let task = new DownloadTask(options.id);
+    tasksMap.set(options.id, task);
+    return task;
+}
+
 export const directories = {
     documents: RNBackgroundDownloader.documents
 };
@@ -106,6 +124,7 @@ export const Priority = {
 
 export default {
     download,
+    downloadStream,
     checkForExistingDownloads,
     setHeaders,
     directories,
