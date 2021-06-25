@@ -63,6 +63,7 @@ RCT_EXPORT_MODULE();
             taskToConfigMap = [[NSMutableDictionary alloc] init];
         }
         idToTaskMap = [[NSMutableDictionary alloc] init];
+        idToAssetTaskMap = [[NSMutableDictionary alloc] init];
         idToResumeDataMap= [[NSMutableDictionary alloc] init];
         idToPercentMap = [[NSMutableDictionary alloc] init];
         willDownloadToUrlMap = [[NSMutableDictionary alloc] init];
@@ -243,6 +244,11 @@ RCT_EXPORT_METHOD(stopTask: (NSString *)identifier) {
           AVAggregateAssetDownloadTask *assetTask = (AVAggregateAssetDownloadTask *)idToAssetTaskMap[identifier];
           if (assetTask != nil && assetTask.state == NSURLSessionTaskStateRunning) {
               [assetTask cancel];
+              NSURL *location = willDownloadToUrlMap[assetTask];
+              if (location) {
+                NSFileManager *fileManager = [NSFileManager defaultManager];
+                [fileManager removeItemAtURL:location error:nil];
+              }
               [self removeTaskFromMap:assetTask];
           }
         }
